@@ -10,16 +10,11 @@ using System.Windows.Forms;
 
 namespace SimulacionTiendaElProfe.Vistas
 {
-    public partial class Catalogos : UserControl
+    public partial class Producto : UserControl
     {
-        public Catalogos()
+        public Producto()
         {
             InitializeComponent();
-            for (int i = 0; i < 10; i++)
-            {
-                Producto pr = new Producto();
-                flowLayoutPanel1.Controls.Add(pr);
-            }
         }
     }
 }

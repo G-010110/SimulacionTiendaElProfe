@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace SimulacionTiendaElProfe
 {
-    public partial class Form2 : Form
+    public partial class InicioM : Form
     {
-        public Form2()
+        public InicioM()
         {
             InitializeComponent();
             cargar();

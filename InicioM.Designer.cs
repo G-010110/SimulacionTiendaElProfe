@@ -1,6 +1,6 @@
 ﻿namespace SimulacionTiendaElProfe
 {
-    partial class Form2
+    partial class InicioM
     {
         /// <summary>
         /// Required designer variable.
