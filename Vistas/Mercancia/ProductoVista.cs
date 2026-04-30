@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace SimulacionTiendaElProfe.Vistas
 {
-    public partial class Producto : UserControl
+    public partial class ProductoVista : UserControl
     {
-        public Producto()
+        public ProductoVista()
         {
             InitializeComponent();
         }

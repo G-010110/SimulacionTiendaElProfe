@@ -20,7 +20,7 @@ namespace SimulacionTiendaElProfe
         public void cargar()
         {
             panel.Controls.Clear();
-            Vistas.Catalogos catalogos = new Vistas.Catalogos();
+            Vistas.Administrador.Catalogos catalogos = new Vistas.Administrador.Catalogos();
             catalogos.Dock = DockStyle.Fill;
             panel.Controls.Add(catalogos);
         }

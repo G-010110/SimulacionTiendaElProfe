@@ -1,4 +1,4 @@
-﻿namespace SimulacionTiendaElProfe.Vistas
+﻿namespace SimulacionTiendaElProfe.Vistas.Usuario
 {
     partial class Catalogos
     {
