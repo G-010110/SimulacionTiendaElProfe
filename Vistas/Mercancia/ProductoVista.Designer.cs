@@ -28,13 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProductoVista));
             this.nombreProducto = new System.Windows.Forms.Label();
             this.precioProducto = new System.Windows.Forms.Label();
             this.bProducto = new System.Windows.Forms.Button();
             this.pictureProducto = new System.Windows.Forms.PictureBox();
             this.stock = new System.Windows.Forms.Label();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.holaaaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureProducto)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // nombreProducto
@@ -87,6 +92,27 @@
             this.stock.TabIndex = 4;
             this.stock.Text = "0";
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.holaaaToolStripMenuItem,
+            this.editarToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 70);
+            // 
+            // holaaaToolStripMenuItem
+            // 
+            this.holaaaToolStripMenuItem.Name = "holaaaToolStripMenuItem";
+            this.holaaaToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.holaaaToolStripMenuItem.Text = "Eliminar";
+            this.holaaaToolStripMenuItem.Click += new System.EventHandler(this.holaaaToolStripMenuItem_Click);
+            // 
+            // editarToolStripMenuItem
+            // 
+            this.editarToolStripMenuItem.Name = "editarToolStripMenuItem";
+            this.editarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.editarToolStripMenuItem.Text = "Editar";
+            // 
             // ProductoVista
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -100,6 +126,7 @@
             this.Name = "ProductoVista";
             this.Size = new System.Drawing.Size(201, 232);
             ((System.ComponentModel.ISupportInitialize)(this.pictureProducto)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -111,5 +138,8 @@
         public System.Windows.Forms.Label nombreProducto;
         public System.Windows.Forms.Label precioProducto;
         public System.Windows.Forms.PictureBox pictureProducto;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem holaaaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editarToolStripMenuItem;
     }
 }

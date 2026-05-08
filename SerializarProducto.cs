@@ -14,7 +14,7 @@ namespace SimulacionTiendaElProfe
         public static void guardar(List<Producto> lista, string nombreArchivo)
         {
             json = JsonSerializer.Serialize(lista);
-            File.WriteAllText(RutasRelativas.rutaDatos+nombreArchivo,json);
+            //File.WriteAllText(RutasRelativas.rutaDatos+nombreArchivo,json);
         }
     }
 }

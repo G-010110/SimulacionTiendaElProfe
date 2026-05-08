@@ -15,9 +15,9 @@ namespace SimulacionTiendaElProfe
         {
             try
             {
-                string datos = File.ReadAllText(RutasRelativas.rutaDatos + nombreArchivo);
-                var Productos = JsonSerializer.Deserialize<List<Producto>>(datos);
-                return Productos;
+                //string datos = File.ReadAllText(RutasRelativas.rutaDatos + nombreArchivo);
+                //var Productos = JsonSerializer.Deserialize<List<Producto>>(datos);
+                return null;
             }catch(Exception e)
             {
                 Console.WriteLine("Error al leer el archivo: "  + e.Message);

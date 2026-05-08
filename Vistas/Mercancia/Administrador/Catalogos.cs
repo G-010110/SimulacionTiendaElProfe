@@ -1,19 +1,32 @@
-﻿using System;
+﻿using SimulacionTiendaElProfe.Conexiones;
+using SimulacionTiendaElProfe.Vistas.Mercancia.Administrador;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SimulacionTiendaElProfe.Conexiones;
+using System.Data.SqlClient;
+using System.Data.SQLite;
 
 namespace SimulacionTiendaElProfe.Vistas.Administrador
 {
     public partial class Catalogos : UserControl
     {
-        private string nombre, precio, cantidad, nombreImagen;
+        private Conector conecta;
+        private Dictionary<int,string> categorias;
+
+        private Dictionary<string, TabPage> tabPages;
+        private Dictionary<string, FlowLayoutPanel> flowLayouts;
+       
+        private string nombre, precio, cantidad,nombreImagen,query,categoriaSeleccionada;
         private int indiceCategoria;
         private string[] secciones = {
             "ProductosAperitivos.json",
@@ -29,26 +42,19 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
         public Catalogos()
         {
             InitializeComponent();
-            productos0 = new List<Producto>();
-            productos1 = new List<Producto>();
-            productos2 = new List<Producto>();
-            productos3 = new List<Producto>();
 
-            cargarProductos();
-            SerializarProducto.guardar(productos0, secciones[0]);
-            SerializarProducto.guardar(productos1, secciones[1]);
-            SerializarProducto.guardar(productos2, secciones[2]);
-            SerializarProducto.guardar(productos3, secciones[3]);
-            //
-            // cargarProductos();
-            ////
-            ///
+            conecta = new ConectorSQLite();
+            tabPages = new Dictionary<string, TabPage>();
+            flowLayouts= new Dictionary<string, FlowLayoutPanel>();
+            categorias = new Dictionary<int,string>();
+
+            CategoriaConfig.cargarEstantes += limpiarCategorias;
+            CategoriaConfig.cargarEstantes += mostrarCategorias;
+            CategoriaConfig.cargarEstantes += cargarEstantes;
+
+            limpiarCategorias();
+            mostrarCategorias();
             cargarEstantes();
-            /*for (int i = 0; i < 10; i++)
-            {
-                ProductoVista pr = new ProductoVista();
-                flowLayoutPanel1.Controls.Add(pr);
-            }*/
         }
 
         private void label4_Click(object sender, EventArgs e)
@@ -58,44 +64,32 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
 
         private void bCargar_Click(object sender, EventArgs e)
         {
+            //cargarPasillos();
             cargarEntradas();
-            cargarProductos();
+            
             if(nombreImagen != "")
             {
-                
-                switch(indiceCategoria) 
-                {
-                    case (int)Categoria.Aperitivos:
-                        productos0.Add(CrearProducto.crear(nombre, precio, cantidad, nombreImagen));
-                        SerializarProducto.guardar(productos0, "ProductosAperitivos.json");
-                    break;
-                    case (int)Categoria.Lacteos:
-                        productos1.Add(CrearProducto.crear(nombre, precio, cantidad, nombreImagen));
-                        SerializarProducto.guardar(productos1, "ProductosLacteos.json");
-                        break;
-                    case (int)Categoria.Enlatado:
-                        productos2.Add(CrearProducto.crear(nombre, precio, cantidad, nombreImagen));
-                        SerializarProducto.guardar(productos2, "ProductosEnlatados.json");
-                        break;
-                    case (int)Categoria.Otros:
-                        productos3.Add(CrearProducto.crear(nombre, precio, cantidad, nombreImagen));
-                        SerializarProducto.guardar(productos3, "ProductosOtros.json");
-                        break;
-                }
+                agregarProductos();
                 
                 cargarEstantes();
+                descargarEntradas();
             } else
             {
                 MessageBox.Show("Debe seleccionar una imagen para el producto.");
             }
             nombreImagen = "";
-
         }
         public void cargarEntradas()
         {
             nombre = tNombre.Text;
             precio = tPrecio.Text;
             cantidad = tCantidad.Text;
+        }
+        public void descargarEntradas()
+        {
+            tNombre.Text ="";
+            tPrecio.Text ="";
+            tCantidad.Text = "";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -105,93 +99,160 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
 
         private void comboCategoria_SelectedIndexChanged(object sender, EventArgs e)
         {
-            indiceCategoria = comboCategoria.SelectedIndex;
-        }
-        
-        public void cargarEstantes()
-        {
-            flowLayoutPanel1.Controls.Clear();
-            flowLayoutPanel2.Controls.Clear();
-            flowLayoutPanel3.Controls.Clear();
-            flowLayoutPanel4.Controls.Clear();
             try
             {
-                foreach (var s in secciones)
+                indiceCategoria = comboCategoria.SelectedIndex;
+                categoriaSeleccionada = comboCategoria.SelectedItem.ToString();
+                if (categoriaSeleccionada == "Agregar")
                 {
-                    foreach (var item in DeserializarProducto.leer(s))
-                    {
-                        ProductoVista productoVista = new ProductoVista();
 
-                        productoVista.nombreProducto.Text = item.nombre;
-                        productoVista.precioProducto.Text = item.precio;
-                        productoVista.stock.Text = item.cantidad;
-                        productoVista.pictureProducto.Image = Image.FromFile(item.nombreIMG);
-                        switch (i)
+                    CategoriaConfig categoriaConfig = new CategoriaConfig();
+                    categoriaConfig.Show();
+            
+                    comboCategoria.SelectedIndex = -1;
+
+                } else
+                {
+                    foreach(var i in categorias)
+                    {
+                        if(i.Value == categoriaSeleccionada)
                         {
-                            case 0:
-                                flowLayoutPanel1.Controls.Add(productoVista);
-                                break;
-                            case 1:
-                                flowLayoutPanel2.Controls.Add(productoVista);
-                                break;
-                            case 2:
-                                flowLayoutPanel3.Controls.Add(productoVista);
-                                break;
-                            case 3:
-                                flowLayoutPanel4.Controls.Add(productoVista);
-                                break;
+                            indiceCategoria = i.Key;
                         }
-                        
-                        //flowLayoutPanel1.Controls.Add(productoVista);
-                        //productoVista.pictureProducto.Image = item.nombreIMG;
                     }
-                    i++;
                 }
-            }
-            catch(System.ArgumentNullException e)
+            } catch(Exception ex)
             {
 
             }
+        }
+        
+        public void mostrarCategorias()
+        {
+            descargarCategoriasDB();
+            foreach (var i in  categorias)
+            {
+                cargarPasillos(i.Value);
+                comboCategoria.Items.Add(i.Value);
+            }
+        }
+
+        public void limpiarCategorias()
+        {
+            tabControl1.TabPages.Clear();
+            flowLayouts.Clear();
+        }
+        //Carga Categorias con su PRIMARY KEY
+        public void descargarCategoriasDB()
+        {
+            categorias.Clear();
+            using (DbConnection conexion = conecta.crearConexion())
+            {
+                conexion.Open();
+                query = "SELECT idCategorias,Nombre FROM Categorias;";
+                //SQLiteCommand comando = new SQLiteCommand(query,(SQliteConnection)conexion);
+                DbCommand comando = conexion.CreateCommand();
+                comando.CommandText = query;
+
+                using (DbDataReader leer = comando.ExecuteReader())
+                {
+                    while (leer.Read())
+                    {
+                        categorias.Add(int.Parse(leer["idCategorias"].ToString()), leer["Nombre"].ToString());
+                        //flowLayouts
+                    }
+                }
+            }
+        }
+        //Carga todas las categorias
+        public void cargarPasillos(string nombre)
+        { 
+            tabControl1.TabPages.Add(pagina(nombre));
             
         }
-        public void cargarProductos()
+        public TabPage pagina(string nombre)
         {
-            var listaObtenida1 = DeserializarProducto.leer(secciones[0]);
-            var listaObtenida2 = DeserializarProducto.leer(secciones[1]);
-            var listaObtenida3 = DeserializarProducto.leer(secciones[2]);
-            var listaObtenida4 = DeserializarProducto.leer(secciones[3]);
+            
+            TabPage tp = new TabPage();
+            tp.Text= nombre;
+            tp.AutoScroll = true;
+            tp.Size = new Size(657, 314);
+            tp.BackColor = SystemColors.Window;
+            tp.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
 
-            productos0.Clear();
-            productos1.Clear();
-            productos2.Clear();
-            productos3.Clear();
 
-            if (listaObtenida1 != null)
+            FlowLayoutPanel fl = new FlowLayoutPanel();
+            fl.Dock = DockStyle.Fill;
+            fl.AutoScroll = true;
+            fl.Size = new Size(651, 308);
+            //Diccionario de flows
+            flowLayouts.Add(nombre, fl);
+            tp.Controls.Add(flowLayouts[nombre]);
+            return tp;
+        }
+        //agrega los productos a los flowlayouts
+        public void cargarEstantes()
+        {
+            limpiarFlowsLayouts();
+            using (DbConnection conexion = conecta.crearConexion())
             {
-                foreach (var item in listaObtenida1)
+                conexion.Open();
+                query = "select p.idProductos,p.Nombre as NombreProductos,p.Precio,p.Cantidad,p.Imagen,p.idCategorias,Categorias.Nombre as NombreCategoria,Categorias.idCategorias from Productos p inner join Categorias ON p.idCategorias=Categorias.idCategorias;";
+                //SQLiteCommand comando = new SQLiteCommand(query,(SQliteConnection)conexion);
+                DbCommand comando = conexion.CreateCommand();
+                comando.CommandText = query;
+
+                using (DbDataReader leer = comando.ExecuteReader())
                 {
-                    productos0.Add(item);
+                    while (leer.Read())
+                    {
+                        //flowLayouts
+                        ProductoVista productoVista = new ProductoVista();
+
+                        productoVista.nombreProducto.Text = leer["NombreProductos"].ToString();
+                        productoVista.precioProducto.Text = leer["Precio"].ToString();
+                        productoVista.stock.Text = leer["Cantidad"].ToString();
+                        productoVista.pictureProducto.Image = Image.FromFile(leer["Imagen"].ToString());
+
+                        foreach (var item in categorias)
+                        {
+
+                            if (item.Value == leer["NombreCategoria"].ToString())
+                            {
+                                flowLayouts[item.Value].Controls.Add(productoVista);
+                            }
+                        }
+                    }
                 }
             }
-            if (listaObtenida2 != null)
+        }
+        public void limpiarFlowsLayouts()
+        {
+            foreach(var item in flowLayouts)
             {
-                foreach (var item in listaObtenida2)
-                {
-                    productos1.Add(item);
-                }
+                item.Value.Controls.Clear();
             }
-            if (listaObtenida3 != null)
+        }
+        public void agregarProductos()
+        {
+            using (DbConnection conexion = conecta.crearConexion())
             {
-                foreach (var item in listaObtenida3)
+                conexion.Open();
+                query = "INSERT INTO Productos (Nombre,Precio,Cantidad,Imagen,idCategorias) VALUES (@nombre,@precio,@cantidad,@imagen,@idCatego);";
+                using (DbCommand comando = conexion.CreateCommand())
                 {
-                    productos2.Add(item);
-                }
-            }
-            if (listaObtenida4 != null)
-            {
-                foreach (var item in listaObtenida4)
-                {
-                    productos3.Add(item);
+                    comando.CommandText = query;
+
+                    comando.Parameters.AddRange(new DbParameter[]
+                    {
+                        new SQLiteParameter("@nombre", nombre),
+                        new SQLiteParameter("@precio",precio),
+                        new SQLiteParameter("@cantidad",cantidad),
+                        new SQLiteParameter("@imagen",nombreImagen),
+                        new SQLiteParameter("@idCatego", indiceCategoria)
+                    });
+                
+                    comando.ExecuteNonQuery();
                 }
             }
         }

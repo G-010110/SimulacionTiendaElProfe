@@ -9,7 +9,9 @@ namespace SimulacionTiendaElProfe
 {
     internal class RutasRelativas
     {
-        public static string rutaDatos = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Datos\");
+        public static string rutaVarEntorno = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName,"Conexiones","Entorno.env");
+        
+        public static string rutaDataxx = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName, "Datos");
         public static string rutaImagenes = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Recursos\Imagenes");
     }
 }

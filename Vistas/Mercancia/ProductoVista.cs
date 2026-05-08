@@ -15,6 +15,12 @@ namespace SimulacionTiendaElProfe.Vistas
         public ProductoVista()
         {
             InitializeComponent();
+            this.ContextMenuStrip = contextMenuStrip1;
+            }
+
+        private void holaaaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
         }
     }
 }

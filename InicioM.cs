@@ -12,17 +12,37 @@ namespace SimulacionTiendaElProfe
 {
     public partial class InicioM : Form
     {
+        public static event Action cerrar;
         public InicioM()
         {
             InitializeComponent();
-            cargar();
+            
         }
         public void cargar()
+        {
+            panel.Controls.Clear();
+            Vistas.Administrador.Usuarios catalogos = new Vistas.Administrador.Usuarios();
+            catalogos.Dock = DockStyle.Fill;
+            panel.Controls.Add(catalogos);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
         {
             panel.Controls.Clear();
             Vistas.Administrador.Catalogos catalogos = new Vistas.Administrador.Catalogos();
             catalogos.Dock = DockStyle.Fill;
             panel.Controls.Add(catalogos);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            cargar();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            cerrar?.Invoke();
+            this.Close();
         }
     }
 }
