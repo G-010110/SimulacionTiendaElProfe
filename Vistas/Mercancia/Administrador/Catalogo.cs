@@ -1,49 +1,27 @@
-﻿using SimulacionTiendaElProfe.Conexiones;
-using SimulacionTiendaElProfe.Vistas.Mercancia.Administrador;
+﻿using SimulacionTiendaElProfe.Vistas.Mercancia.Administrador;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.Common;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using SimulacionTiendaElProfe.Conexiones;
-using System.Data.SqlClient;
-using System.Data.SQLite;
+using SimulacionTiendaElProfe.controller;
 
 namespace SimulacionTiendaElProfe.Vistas.Administrador
 {
-    public partial class Catalogos : UserControl
+    public partial class Catalogo : UserControl
     {
-        private Conector conecta;
         private Dictionary<int,string> categorias;
 
         private Dictionary<string, TabPage> tabPages;
         private Dictionary<string, FlowLayoutPanel> flowLayouts;
        
-        private string nombre, precio, cantidad,nombreImagen,query,categoriaSeleccionada;
+        private string nombre, precio, cantidad,nombreImagen,categoriaSeleccionada;
         private int indiceCategoria;
-        private string[] secciones = {
-            "ProductosAperitivos.json",
-            "ProductosLacteos.json",
-            "ProductosEnlatados.json",
-            "ProductosOtros.json" };
-        int i = 0;
-        private enum Categoria { Aperitivos=0, Lacteos=1, Enlatado = 2, Bebidas =45,  Carnes=5, FrutasVerduras=6, Congelados=7, HigienePersonal=8, LimpiezaHogar=9, Otros=3 };
-        private List<Producto> productos0;
-        private List<Producto> productos1;
-        private List<Producto> productos2;
-        private List<Producto> productos3;
-        public Catalogos()
+        
+        public Catalogo()
         {
             InitializeComponent();
 
-            conecta = new ConectorSQLite();
             tabPages = new Dictionary<string, TabPage>();
             flowLayouts= new Dictionary<string, FlowLayoutPanel>();
             categorias = new Dictionary<int,string>();
@@ -69,7 +47,7 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
             
             if(nombreImagen != "")
             {
-                agregarProductos();
+                ControladorProducto.addProducto(objetoProducto());
                 
                 cargarEstantes();
                 descargarEntradas();
@@ -84,6 +62,18 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
             nombre = tNombre.Text;
             precio = tPrecio.Text;
             cantidad = tCantidad.Text;
+        }
+        //Crea un objeto del producto a almacenar
+        public Producto objetoProducto()
+        {
+            Producto producto = new Producto();
+            producto.nombre = nombre;
+            producto.precio = precio;
+            producto.cantidad = cantidad;
+            producto.nombreIMG = nombreImagen;
+            producto.idCategoria = indiceCategoria + "";
+
+            return producto;
         }
         public void descargarEntradas()
         {
@@ -101,17 +91,16 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
         {
             try
             {
-                indiceCategoria = comboCategoria.SelectedIndex;
+                //indiceCategoria = comboCategoria.SelectedIndex;
                 categoriaSeleccionada = comboCategoria.SelectedItem.ToString();
                 if (categoriaSeleccionada == "Agregar")
                 {
-
                     CategoriaConfig categoriaConfig = new CategoriaConfig();
                     categoriaConfig.Show();
             
                     comboCategoria.SelectedIndex = -1;
-
-                } else
+                } 
+                else
                 {
                     foreach(var i in categorias)
                     {
@@ -146,21 +135,12 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
         public void descargarCategoriasDB()
         {
             categorias.Clear();
-            using (DbConnection conexion = conecta.crearConexion())
+            using (var leer = ControladorProducto.obtenerCategorias())
             {
-                conexion.Open();
-                query = "SELECT idCategorias,Nombre FROM Categorias;";
-                //SQLiteCommand comando = new SQLiteCommand(query,(SQliteConnection)conexion);
-                DbCommand comando = conexion.CreateCommand();
-                comando.CommandText = query;
-
-                using (DbDataReader leer = comando.ExecuteReader())
+                while (leer.Read())
                 {
-                    while (leer.Read())
-                    {
-                        categorias.Add(int.Parse(leer["idCategorias"].ToString()), leer["Nombre"].ToString());
-                        //flowLayouts
-                    }
+                    categorias.Add(int.Parse(leer["idCategorias"].ToString()), leer["Nombre"].ToString());
+                    //flowLayouts
                 }
             }
         }
@@ -190,38 +170,27 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
             tp.Controls.Add(flowLayouts[nombre]);
             return tp;
         }
-        //agrega los productos a los flowlayouts
+        //Agrega los productos a los flowlayouts (Muestra los productos en la pantalla)
         public void cargarEstantes()
         {
             limpiarFlowsLayouts();
-            using (DbConnection conexion = conecta.crearConexion())
+
+            var leer = ControladorProducto.obtenerProductos();
+            while (leer.Read())
             {
-                conexion.Open();
-                query = "select p.idProductos,p.Nombre as NombreProductos,p.Precio,p.Cantidad,p.Imagen,p.idCategorias,Categorias.Nombre as NombreCategoria,Categorias.idCategorias from Productos p inner join Categorias ON p.idCategorias=Categorias.idCategorias;";
-                //SQLiteCommand comando = new SQLiteCommand(query,(SQliteConnection)conexion);
-                DbCommand comando = conexion.CreateCommand();
-                comando.CommandText = query;
+                //flowLayouts
+                ProductoVista productoVista = new ProductoVista();
 
-                using (DbDataReader leer = comando.ExecuteReader())
+                productoVista.nombreProducto.Text = leer["NombreProductos"].ToString();
+                productoVista.precioProducto.Text = leer["Precio"].ToString();
+                productoVista.stock.Text = leer["Cantidad"].ToString();
+                productoVista.pictureProducto.Image = Image.FromFile(leer["Imagen"].ToString());
+
+                foreach (var item in categorias)
                 {
-                    while (leer.Read())
+                    if (item.Value == leer["NombreCategoria"].ToString())
                     {
-                        //flowLayouts
-                        ProductoVista productoVista = new ProductoVista();
-
-                        productoVista.nombreProducto.Text = leer["NombreProductos"].ToString();
-                        productoVista.precioProducto.Text = leer["Precio"].ToString();
-                        productoVista.stock.Text = leer["Cantidad"].ToString();
-                        productoVista.pictureProducto.Image = Image.FromFile(leer["Imagen"].ToString());
-
-                        foreach (var item in categorias)
-                        {
-
-                            if (item.Value == leer["NombreCategoria"].ToString())
-                            {
-                                flowLayouts[item.Value].Controls.Add(productoVista);
-                            }
-                        }
+                        flowLayouts[item.Value].Controls.Add(productoVista);
                     }
                 }
             }
@@ -233,30 +202,7 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
                 item.Value.Controls.Clear();
             }
         }
-        public void agregarProductos()
-        {
-            using (DbConnection conexion = conecta.crearConexion())
-            {
-                conexion.Open();
-                query = "INSERT INTO Productos (Nombre,Precio,Cantidad,Imagen,idCategorias) VALUES (@nombre,@precio,@cantidad,@imagen,@idCatego);";
-                using (DbCommand comando = conexion.CreateCommand())
-                {
-                    comando.CommandText = query;
-
-                    comando.Parameters.AddRange(new DbParameter[]
-                    {
-                        new SQLiteParameter("@nombre", nombre),
-                        new SQLiteParameter("@precio",precio),
-                        new SQLiteParameter("@cantidad",cantidad),
-                        new SQLiteParameter("@imagen",nombreImagen),
-                        new SQLiteParameter("@idCatego", indiceCategoria)
-                    });
-                
-                    comando.ExecuteNonQuery();
-                }
-            }
-        }
-
+        
         public string SeleccionarImagenYGuardar()
         {
             OpenFileDialog ofd;
@@ -302,3 +248,38 @@ namespace SimulacionTiendaElProfe.Vistas.Administrador
         }
     }
 }
+
+
+/* Algoritmo para gestionar el catálogo de productos 
+         * 
+         * --------Al iniciar el programa TapPage Default = 1
+         * Descargar categorias de la DB (en un diccionario con su PK)
+         * Actualizar el comboBox de categorias
+         * Actualizar el TapPage con las categorias (se agrega un FlowLayoutPanel a cada TapPage)
+         * 
+         * --------Mostrar productos en la pantalla
+         * Descargar productos de la DB (en un diccionario con su PK)
+         * Limpiar los TapPage (limpiar pantalla)
+         * Agregar los productos a la pantalla 
+         * 
+         * --------Agregar un nuevo producto
+         * Cargar los datos del producto 
+         * Crear un objeto del producto
+         * Agregar el producto a la DB
+         * Descargar productos de la DB (en un diccionario con su PK)
+         * Limpiar los TapPage (limpiar pantalla)
+         * Agregar los productos a la pantalla 
+         * 
+         * --------Eliminar un producto
+         * Eliminar el producto de la DB
+         * Descargar productos de la DB (en un diccionario con su PK)
+         * Limpiar los TapPage (limpiar pantalla)
+         * Agregar los productos a la pantalla 
+         * 
+         * --------Modificar un producto
+         * Modificar los datos del objeto del producto correspondiente
+         * Enviar una peticion de actualizacion a la DB con la PK del producto
+         * Descargar productos de la DB (en un diccionario con su PK)
+         * Limpiar los TapPage (limpiar pantalla)
+         * Agregar los productos a la pantalla 
+            */

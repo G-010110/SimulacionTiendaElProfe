@@ -77,7 +77,6 @@
             this.linkLabelCrearUsuario.TabIndex = 7;
             this.linkLabelCrearUsuario.TabStop = true;
             this.linkLabelCrearUsuario.Text = "aquí";
-            this.linkLabelCrearUsuario.Visible = false;
             this.linkLabelCrearUsuario.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelCrearUsuario_LinkClicked);
             // 
             // label4
@@ -89,7 +88,6 @@
             this.label4.Size = new System.Drawing.Size(189, 19);
             this.label4.TabIndex = 6;
             this.label4.Text = "No tienes cuenta, crea una ";
-            this.label4.Visible = false;
             // 
             // bEntrar
             // 

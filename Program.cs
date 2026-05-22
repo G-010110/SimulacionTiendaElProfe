@@ -16,7 +16,7 @@ namespace SimulacionTiendaElProfe
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginMejorado.Login());
+            Application.Run(new InicioM());
         }
     }
 }

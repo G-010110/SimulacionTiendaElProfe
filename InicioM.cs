@@ -29,7 +29,7 @@ namespace SimulacionTiendaElProfe
         private void button1_Click(object sender, EventArgs e)
         {
             panel.Controls.Clear();
-            Vistas.Administrador.Catalogos catalogos = new Vistas.Administrador.Catalogos();
+            Vistas.Administrador.Catalogo catalogos = new Vistas.Administrador.Catalogo();
             catalogos.Dock = DockStyle.Fill;
             panel.Controls.Add(catalogos);
         }

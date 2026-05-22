@@ -1,6 +1,6 @@
 ﻿namespace SimulacionTiendaElProfe.Vistas.Administrador
 {
-    partial class Catalogos
+    partial class Catalogo
     {
         /// <summary> 
         /// Variable del diseñador necesaria.
